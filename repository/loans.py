@@ -1,5 +1,5 @@
 from pony import orm
-from data import db
+from . import db
 from .instruments import Instruments
 from .students import Students
 

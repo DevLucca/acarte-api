@@ -1,6 +1,5 @@
 import os
 import json
-import boto3
 from . import utils
 
 class Config:
@@ -19,18 +18,17 @@ class Config:
         Remember to keep the enviroments on the same name on each occasion, or else it won't be found
         '''
         self.all_keys = {key: {'value': value, 'setby': None} for key, value in self.__dict__.items()}
-        self.ssm = boto3.client('ssm')  
 
-        if utils.check_exists_file("config.json"):
+        config_file_exists = utils.check_exists_file("config.json")
+        if config_file_exists:
             f = open("config.json", "r")
             self.configjson = json.load(f)
         
         for key in self.all_keys:
-            if self.__get_from_file(key):
+            if config_file_exists:
+                self.__get_from_file(key)
                 continue
             elif self.__get_from_env(key):
-                continue
-            elif self.__get_from_ssm(key):
                 continue
 
         return self.all_keys
@@ -40,14 +38,6 @@ class Config:
         if utils.check_env_by_name(prefix+key):
             self.all_keys[key]['value'] = os.getenv(prefix+key)
             self.all_keys[key]['setby'] = 'ENV'
-            return True
-        return False
-
-    def __get_from_ssm(self, key: str) -> None:
-        if utils.check_env_by_name("PARAMETERSTOREPATH"):
-            parameter = self.ssm.get_parameter(Name=f"/${os.getenv('PARAMETERSTOREPATH')}/${key}", WithDecryption=True)
-            self.all_keys[key]['value'] = parameter['Parameter']['Value']
-            self.all_keys[key]['setby'] = 'SSM'
             return True
         return False
 
