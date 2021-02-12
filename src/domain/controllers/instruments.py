@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from repository.instruments import InstrumentsRepository
+from data.repositories.instruments import InstrumentsRepository
 class InstrumentController():
     
     def get_filtered(filters):

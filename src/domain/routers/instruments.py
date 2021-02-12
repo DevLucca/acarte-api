@@ -1,5 +1,5 @@
-from controllers.instruments import InstrumentController
-from viewmodels.instruments import (
+from domain.controllers.instruments import InstrumentController
+from domain.viewmodels.instruments import (
     RegisterInstrumentSchema,
     ResponseInstrumentSchema
 )

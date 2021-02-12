@@ -1,8 +1,8 @@
 from pony import orm
-from src import db
-from viewmodels.instruments import ResponseInstrumentSchema
+from data.database import Entity
+from domain.viewmodels.instruments import ResponseInstrumentSchema
 
-class Instruments(db.Entity):
+class Instruments(Entity):
     schema = ResponseInstrumentSchema
 
     loan = orm.Set("Loans")

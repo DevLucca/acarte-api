@@ -1,7 +1,8 @@
-from models.instruments import Instruments
-from viewmodels.instruments import ResponseInstrumentSchema
-from repository import BaseRepository
-from repository import orm
+from data.entities.instruments import Instruments
+from domain.viewmodels.instruments import ResponseInstrumentSchema
+from data.repositories import BaseRepository
+from pony import orm
+from fastapi import HTTPException
 
 class InstrumentsRepository(BaseRepository):
     Model = Instruments
@@ -11,8 +12,9 @@ class InstrumentsRepository(BaseRepository):
     def get(cls, filters):
         try:
             with orm.db_session:
+                
                 obj = cls.Model
-                print(obj[1])
+                print(obj[0])
 
                 print(cls.Validator.from_orm(obj))
                 return 

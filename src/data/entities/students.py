@@ -1,7 +1,7 @@
 from pony import orm
-from src import db
+from data.database import Entity
 
-class Students(db.Entity):
+class Students(Entity):
     loan = orm.Set("Loans")
     uuid = orm.Required(str,max_len=36,unique=True)
     name = orm.Required(str,max_len=50,unique=True)

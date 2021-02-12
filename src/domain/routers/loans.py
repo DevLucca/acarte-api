@@ -1,5 +1,5 @@
-from controllers.loans import LoanController
-from viewmodels.loans import (
+from domain.controllers.loans import LoanController
+from domain.viewmodels.loans import (
     RegisterLoanSchema,
     ResponseLoanSchema
 )

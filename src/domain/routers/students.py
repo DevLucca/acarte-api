@@ -1,5 +1,5 @@
-from controllers.students import StudentController
-from viewmodels.students import (
+from domain.controllers.students import StudentController
+from domain.viewmodels.students import (
     RegisterStudentSchema,
     ResponseStudentSchema
 )

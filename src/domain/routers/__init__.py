@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from routers import (
+from domain.routers import (
     students,
     instruments,
     loans

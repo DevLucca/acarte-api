@@ -1,6 +1,6 @@
 from core import cfg
 from pony import orm
-from main import db
+from data.database import Entity
 
 class MetaRepository(type):
 
@@ -10,7 +10,7 @@ class MetaRepository(type):
 
 
 class BaseRepository(metaclass=MetaRepository):
-    Model = db.Entity
+    Model = Entity
     # Validator = BaseValidator
 
     @classmethod
