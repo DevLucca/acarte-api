@@ -1,21 +1,6 @@
 from core import cfg
 from pony import orm
-
-orm.sql_debug(True)
-
-db = orm.Database()
-db.bind(
-    provider='mysql',
-    host=cfg["db-location"]["value"],
-    port=cfg["db-port"]["value"],
-    user=cfg["db-user"]["value"],
-    passwd=cfg["db-password"]["value"],
-    db=cfg["db-name"]["value"]
-    )
-
-# from models.instruments import Instruments
-# from validators import BaseValidator
-# from validators.users import UserValidator
+from main import db
 
 class MetaRepository(type):
 
@@ -34,9 +19,6 @@ class BaseRepository(metaclass=MetaRepository):
             with orm.db_session:
                 obj = cls.Model(**data)
                 orm.flush()
-
-                if raw:
-                    return obj
 
                 return cls.Validator.from_orm(obj)
         except orm.TransactionIntegrityError as error:

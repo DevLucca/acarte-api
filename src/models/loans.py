@@ -1,5 +1,5 @@
 from pony import orm
-from repository import db
+from src import db
 from models.instruments import Instruments
 from models.students import Students
 

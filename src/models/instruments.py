@@ -1,5 +1,5 @@
 from pony import orm
-from repository import db
+from src import db
 from viewmodels.instruments import ResponseInstrumentSchema
 
 class Instruments(db.Entity):

@@ -1,5 +1,5 @@
 from pony import orm
-from repository import db
+from src import db
 
 class Students(db.Entity):
     loan = orm.Set("Loans")

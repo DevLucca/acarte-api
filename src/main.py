@@ -1,9 +1,19 @@
 import uvicorn
-from fastapi import FastAPI
 from core import cfg
+from pony import orm
+from fastapi import FastAPI
 from routers import router
-from models import DBClient
 
+db = orm.Database()
+db.bind(
+    provider='mysql',
+    host=cfg["db-location"]["value"],
+    port=cfg["db-port"]["value"],
+    user=cfg["db-user"]["value"],
+    passwd=cfg["db-password"]["value"],
+    db=cfg["db-name"]["value"]
+)
+db.generate_mapping(create_tables=True)
 
 app = FastAPI(
     title="ACARTE - Instrument Loan", 
@@ -17,7 +27,6 @@ app.include_router(
 )
 
 if __name__ == "__main__":
-    DBClient.initialize()
     uvicorn.run(
         "main:app", 
         host="0.0.0.0",
