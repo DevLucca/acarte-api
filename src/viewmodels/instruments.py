@@ -12,7 +12,7 @@ class RegisterInstrumentSchema(BaseValidator):
     repair: bool = Field(False)
     active: bool = Field(True)
 
-class ResponseInstrumentSchema(BaseModel):
+class ResponseInstrumentSchema(BaseValidator):
     uuid: str
     instrument_id: str
     name: str

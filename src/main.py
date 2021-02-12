@@ -2,8 +2,8 @@ import uvicorn
 from fastapi import FastAPI
 from core import cfg
 from routers import router
-from repository import DBClient
-# DBClient.initialize()
+from models import DBClient
+
 
 app = FastAPI(
     title="ACARTE - Instrument Loan", 
@@ -17,6 +17,7 @@ app.include_router(
 )
 
 if __name__ == "__main__":
+    DBClient.initialize()
     uvicorn.run(
         "main:app", 
         host="0.0.0.0",

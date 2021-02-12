@@ -1,16 +1,16 @@
 from fastapi import HTTPException
-from repository.instruments import Instruments
+from repository.instruments import InstrumentsRepository
 class InstrumentController():
     
     def get_filtered(filters):
-        print(filters)
+        return InstrumentsRepository.get(filters)
 
     def get_by_uuid(uuid):
         print(uuid)
 
     def create(data):
         data = validate(data)
-        return Instruments.create(data)
+        return InstrumentsRepository.create(data)
 
     def update(uuid, data):
         validate(data)

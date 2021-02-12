@@ -1,6 +1,5 @@
 from . import (
-    config,
-    logger
+    config
 )
 
 cfg = config.Config(
@@ -8,9 +7,8 @@ cfg = config.Config(
     "app-port",
     "app-debug",
     "db-location",
+    "db-port",
     "db-name",
     "db-user",
-    "db-password",
-    "client-id",
-    "client-secret"
+    "db-password"
 ).get_keys()

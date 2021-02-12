@@ -1,38 +1,32 @@
 from core import cfg
 from pony import orm
 
+orm.sql_debug(True)
+
 db = orm.Database()
 db.bind(
-    provider='sqlite',
-    filename=':memory:'
-    # host=cfg["db-location"]["value"],
-    # user=cfg["db-user"]["value"],
-    # passwd=cfg["db-password"]["value"],
-    # db=cfg["db-name"]["value"]
+    provider='mysql',
+    host=cfg["db-location"]["value"],
+    port=cfg["db-port"]["value"],
+    user=cfg["db-user"]["value"],
+    passwd=cfg["db-password"]["value"],
+    db=cfg["db-name"]["value"]
     )
-class DBClient:
 
-    @classmethod
-    def initialize(cls):
-        from . import (instruments, loans, students, users)
-        db.generate_mapping(create_tables=True)
+# from models.instruments import Instruments
+# from validators import BaseValidator
+# from validators.users import UserValidator
 
-from pony import orm
-from models import db
-from models.users import User
-from validators import BaseValidator
-from validators.users import UserValidator
-
-class MetaController(type):
+class MetaRepository(type):
 
     @property
     def classname(cls):
-        return cls.__name__.replace("Controller","")
+        return cls.__name__.replace("Repository","")
 
 
-class BaseController(metaclass=MetaController):
+class BaseRepository(metaclass=MetaRepository):
     Model = db.Entity
-    Validator = BaseValidator
+    # Validator = BaseValidator
 
     @classmethod
     def create(cls, data:dict,raw:bool=False):
