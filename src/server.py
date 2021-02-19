@@ -10,7 +10,8 @@ def get_application() -> FastAPI:
     app = FastAPI(
         title="ACARTE - Instrument Loan", 
         version="0.0.1",
-        debug=False
+        debug=False,
+        openapi_url="/openapi.json"
     )
 
     app.add_middleware(
@@ -21,11 +22,8 @@ def get_application() -> FastAPI:
         allow_headers=["*"],
     )
 
-    from domain.routers import router
-    app.include_router(
-        router,
-        prefix='/v1'
-    )
+    from domain.routers.v1 import router as v1_router
+    app.include_router(v1_router)
 
     return app
 
@@ -36,5 +34,7 @@ if __name__ == "__main__":
         "server:app", 
         host="0.0.0.0",
         port=4000,
-        reload=True
+        reload=True,
+        workers=1
+        # log_config=dictConfig("json")
     )
