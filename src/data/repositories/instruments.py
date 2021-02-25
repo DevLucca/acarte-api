@@ -1,26 +1,33 @@
-from data.entities.instruments import Instruments
-from domain.viewmodels.instruments import ResponseInstrumentSchema
-from data.repositories import BaseRepository
-from pony import orm
-from fastapi import HTTPException
+from data.entities.instruments import Instruments as InstrumentsEntity
+from data.entities.students import Students as StudentsEntity
+from data.repositories import (
+    BaseRepository, 
+    orm, 
+    orm_decorator
+)
 
 class InstrumentsRepository(BaseRepository):
-    Model = Instruments
-    Validator = ResponseInstrumentSchema
+    Entity = InstrumentsEntity
+    StudentsEntity = StudentsEntity
 
     @classmethod
-    def get(cls, filters):
-        try:
-            with orm.db_session:
-                
-                obj = cls.Model
-                print(obj[0])
-
-                print(cls.Validator.from_orm(obj))
-                return 
-        except orm.ObjectNotFound:
-            raise HTTPException(404,f"{cls.classname} not found.")
-
+    @orm_decorator
+    def get(cls, name, instrument_id, repair, active):
+        objs = orm.select(i for i in cls.Entity 
+        if i.name.startswith(name) 
+        and i.instrument_id.startswith(instrument_id) 
+        and i.repair == repair
+        and i.active == active
+        and i.deleted_at is None)
+        return objs
+    
     @classmethod
-    def create(cls, data):
-        super().create(data)
+    @orm_decorator
+    def get_student_loan(cls, uuid):
+        obj = orm.get(
+            s for s in cls.StudentsEntity for l in s.loan for i in l.instrument_id
+            if i.uuid == uuid
+            and i.active
+            and i.deleted_at is None
+            )
+        return obj

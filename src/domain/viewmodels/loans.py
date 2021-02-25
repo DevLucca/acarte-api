@@ -2,18 +2,18 @@ from data.repositories import instruments
 from pydantic.fields import Field
 from domain.viewmodels import (
     BaseValidator,
-    BaseModel,
     instruments,
     students
 )
+from typing import List
 
 class RegisterLoanSchema(BaseValidator):
     instrument_uuid: str = Field(...)
     student_uuid: str = Field(...)
 
-class ResponseLoanSchema(BaseModel):
+class ResponseLoanSchema(BaseValidator):
     uuid: str
-    instrument: instruments.ResponseInstrumentSchema
+    instrument: List[instruments.ResponseInstrumentSchema]
     student: students.ResponseStudentSchema
     lented_at: str
     returned_at: str

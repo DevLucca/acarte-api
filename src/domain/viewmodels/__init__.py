@@ -14,7 +14,8 @@ class MetaValidator(ModelMetaclass):
 class BaseValidator(BaseModel, metaclass=MetaValidator):
     class Config:
         orm_mode = True
-        alias_generator = lambda field_name: re.sub(
-            r"_([a-zA-Z])", lambda x: x[1].upper(), field_name
-        )
+        alias_generator = lambda field_name: field_name.replace('_', '-')
+        # alias_generator = lambda field_name: re.sub(
+        #     r"_([a-zA-Z])", lambda x: x[1].upper(), field_name
+        # )
         allow_population_by_field_name = True

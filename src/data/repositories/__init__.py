@@ -1,6 +1,7 @@
-from core import cfg
 from pony import orm
 from data.database import Entity
+from uuid import uuid4
+from datetime import datetime
 
 class MetaRepository(type):
 
@@ -8,46 +9,74 @@ class MetaRepository(type):
     def classname(cls):
         return cls.__name__.replace("Repository","")
 
+def orm_decorator(callable):
+        def internal_decorated(*args, **kwargs):
+            try:
+                with orm.db_session:
+                    return_response = callable(*args, **kwargs)
+                    orm.commit()
+                    orm.flush()
+                    return return_response
+            except:
+                orm.rollback()
+        return internal_decorated
 
 class BaseRepository(metaclass=MetaRepository):
-    Model = Entity
-    # Validator = BaseValidator
-
+    Entity = Entity
+        
     @classmethod
-    def create(cls, data:dict,raw:bool=False):
+    @orm_decorator
+    def get_by_uuid(cls, uuid):
         try:
-            with orm.db_session:
-                obj = cls.Model(**data)
-                orm.flush()
-
-                return cls.Validator.from_orm(obj)
-        except orm.TransactionIntegrityError as error:
-            raise HTTPException(400,error.args)
+            obj = cls.Entity.get(uuid = uuid)
+            assert obj is not None
+            return obj
+        except AssertionError:
+            raise orm.ObjectNotFound(cls.Entity)
 
     @classmethod
-    def get_by_id(cls,id:int,raw:bool = False):
+    @orm_decorator
+    def create(cls, data:dict):
         try:
-            with orm.db_session:
-                obj = cls.Model[id]
-            
-                if raw:
-                    return obj
+            data['uuid'] = str(uuid4())
+            obj = cls.Entity(**data)
 
-                return cls.Validator.from_orm(obj)
-        except orm.ObjectNotFound:
-            raise HTTPException(404,f"{cls.classname} not found.")
+            return obj
+        except orm.TransactionIntegrityError as e:
+            raise e
 
     @classmethod
-    def list(cls,raw:bool = False):
-        with orm.db_session:
-            query = orm.select(user for user in User)
+    @orm_decorator
+    def update(cls, uuid, updated_data):
+        try:
+            assert cls.is_deleted(uuid) is not True
+            obj = cls.get_by_uuid(uuid)
+            obj.set(updated_at=datetime.now(), **updated_data)
 
-            if raw:
-                return query
-            return [cls.Validator.from_orm(obj) for obj in query]
+            return obj
+        except AssertionError:
+            raise orm.ObjectNotFound(cls.Entity)
+        except orm.IntegrityError:
+            raise orm.IntegrityError(cls.Entity)
+    
+    @classmethod
+    @orm_decorator
+    def delete(cls, uuid):
+        try:
+            obj = cls.get_by_uuid(uuid)
+            obj.active = False
+            obj.deleted_at = datetime.now()
+
+            return obj
+        except Exception as e:
+            raise e
 
     @classmethod
-    def delete(cls,id:int):
-        with orm.db_session:
-            obj = cls.get_by_id(id,True)
-            obj.delete()
+    @orm_decorator
+    def is_deleted(cls, uuid):
+        try:
+            if cls.get_by_uuid(uuid).deleted_at is None:
+                return False
+            return True
+        except Exception as e:
+            raise e

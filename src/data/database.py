@@ -22,12 +22,13 @@ class Client:
 
     def generate_mapping(self):
         if not self.mapped:
-            from data.entities.instruments import Instruments
-            from data.entities.loans import Loans
-            from data.entities.students import Students
-            
-            self.db.generate_mapping(check_tables=True)
+            from data.entities import (instruments, loans, students)
+        
+            self.db.generate_mapping(check_tables=True, create_tables=True)
             self.mapped = True
 
 client = Client()
 Entity = client.db.Entity
+
+# orm.sql_debug(True)
+# orm.set_sql_debug(True)
