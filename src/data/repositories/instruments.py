@@ -1,33 +1,42 @@
-from data.entities.instruments import Instruments as InstrumentsEntity
-from data.entities.students import Students as StudentsEntity
-from data.repositories import (
-    BaseRepository, 
-    orm, 
-    orm_decorator
-)
+from .base import BaseRepository
+from src.data.entities.instruments import Instruments as InstrumentEntity
+from ...domain.dtos.instruments import Instrument
+from pony import orm
+from uuid import UUID, uuid4
 
-class InstrumentsRepository(BaseRepository):
-    Entity = InstrumentsEntity
-    StudentsEntity = StudentsEntity
+class InstrumentRepository(BaseRepository):
+    Entity: type[InstrumentEntity]
 
-    @classmethod
-    @orm_decorator
-    def get(cls, name, instrument_id, repair, active):
-        objs = orm.select(i for i in cls.Entity 
-        if i.name.startswith(name) 
-        and i.instrument_id.startswith(instrument_id) 
-        and i.repair == repair
-        and i.active == active
-        and i.deleted_at is None)
-        return objs
-    
-    @classmethod
-    @orm_decorator
-    def get_student_loan(cls, uuid):
-        obj = orm.get(
-            s for s in cls.StudentsEntity for l in s.loan for i in l.instrument_id
-            if i.uuid == uuid
-            and i.active
-            and i.deleted_at is None
-            )
-        return obj
+    def __init__(self) -> None:
+        self.Entity = InstrumentEntity
+
+    def _get_db_obj(self, id: UUID) -> InstrumentEntity:
+        return super()._get_db_obj(id)
+
+    def query(self, **kwargs) -> list[Instrument]:
+        db_query = (
+            orm.select(service for service in self.Entity)
+                .filter(**self._clean_filter_args(kwargs))
+                .order_by(self.Entity.start)
+        )
+        return [Instrument(**db_obj.to_dict()) for db_obj in db_query]
+
+    def get(self, id: UUID) -> Instrument:
+        db_obj = self._get_db_obj(id)
+        return Instrument(**db_obj.to_dict())
+
+    def create(self, dto: Instrument) -> Instrument:
+        dto.id = uuid4()
+        db_obj = self.Entity(**dto.dict())
+        orm.commit()
+        return Instrument(**db_obj.to_dict())
+
+    def save(self, dto: Instrument) -> Instrument:
+        db_obj = self._get_db_obj(dto.id)
+        db_obj.set(**dto.dict())
+        orm.commit()
+        return Instrument(**db_obj.to_dict())
+
+    def delete(self, dto: Instrument) -> None:
+        db_obj = self._get_db_obj(dto.id)
+        db_obj.delete()
