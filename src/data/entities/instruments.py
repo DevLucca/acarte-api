@@ -1,19 +1,22 @@
 import datetime
 from pony import orm
-from .. import db_client
+from uuid import UUID
+from data import db_client
+from data.entities.users import UsersEntity
 
-class Instruments(db_client.Entity):
-    _table_ = "instruments"
+class InstrumentsEntity(db_client.Entity):
+    _table_ = 'instruments'
     
-    loan = orm.Set("Loans")
-    uuid = orm.Required(str,max_len=36,unique=True)
+    loan = orm.Set("LoansEntity")
+    uuid = orm.Required(UUID,unique=True)
     number = orm.Required(str,max_len=50)
     name = orm.Required(str,max_len=50)
     itype = orm.Required(str,max_len=50)
-    notes = orm.Optional(str,max_len=1000,sql_default="''", nullable=True)
+    notes = orm.Optional(str,max_len=1000, nullable=True)
     repair = orm.Required(bool,sql_default=False)
     active = orm.Required(bool,sql_default=True)
     created_at = orm.Required(datetime.datetime,default=datetime.datetime.now())
     updated_at = orm.Optional(datetime.datetime)
+    updated_by = orm.Required(UsersEntity)
 
     orm.composite_key(name, number, itype)

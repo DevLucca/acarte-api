@@ -1,9 +1,12 @@
-from fastapi import Response
-from .base import BaseRouter
+from domain.routers import BaseRouter
 
 api = BaseRouter(
     prefix="/health",
     tags=["Health"]
 )
 
-api.get("/", name="Health Route", summary="Checar status da API")(lambda : True)
+api.get("/",
+        response_model=None,
+        name="Health Route",
+        summary="Checar status da API"
+    )(lambda : {'ok':True})
