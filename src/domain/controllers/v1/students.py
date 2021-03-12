@@ -2,10 +2,10 @@ import traceback
 from uuid import UUID
 
 from domain.dtos.users import UserDTO
-from domain.dtos.instruments import InstrumentDTO
+from domain.dtos.students import StudentDTO
 from domain.controllers.auth import AuthController
 
-from data.repositories.instruments import InstrumentRepository
+from data.repositories.students import StudentRepository
 
 from fastapi import (
     Query, 
@@ -19,32 +19,32 @@ from fastapi_pagination.paginator import paginate
 
 descriptions = {
     "uuid": "Universally Unique Identifier.",
-    "name": "Nome do Instrumento. Exemplo: Saxofone, Flauta, Trompete...",
-    "number": "Numero do Instrumento. Exemplo: Saxofone 01, Saxofone 02, Flauta 01...",
-    "itype": "Tipo do Instrumento. Exemplo: Madeira, Metal, Percussao, Cordas...",
-    "repair": "Booleano para caso o instrumento esteja em reparo, portanto desabilitado para emprestimos.",
-    "active": "Booleano para status de disponibilidade do instrumento."
+    "name": "Nome do Aluno.",
+    "surname": "Sobrenome do Aluno.",
+    "ra": "Registro do Aluno.",
+    "blocked": "Booleano para caso o aluno bloqueado para realizar outro emprestimo",
+    "active": "Booleano para status de disponibilidade do aluno"
 }
 
-class InstrumentController:
-    repository = InstrumentRepository()
-    DTO = InstrumentDTO
+class StudentController:
+    repository = StudentRepository()
+    DTO = StudentDTO
 
     async def get(
         self,
-        name: str = Query(None, description=descriptions['name']),
-        number: str = Query(None, description=descriptions['number']),
-        itype: str = Query(None, description=descriptions['itype']),
-        repair: bool = Query(False, description=descriptions['repair']),
-        active: bool = Query(True, description=descriptions['active']),
+        name: str = Query("", description=descriptions['name']),
+        surname: str = Query("", description=descriptions['surname']),
+        ra: str = Query("", description=descriptions['ra']),
+        blocked: bool = Query(False, description=descriptions['blocked']), 
+        active: bool =  Query(True, description=descriptions['active']),
         pagination: PaginationParams = Depends()
     ) -> Page[DTO]:
         try:
             return paginate(self.repository.query(
                 name=name,
-                number=number,
-                itype=itype,
-                repair=repair,
+                surname=surname,
+                ra=ra,
+                blocked=blocked,
                 active=active,
             ), pagination)
         except Exception:
@@ -55,41 +55,41 @@ class InstrumentController:
         uuid: UUID = Path(..., description=descriptions['uuid'])
     ) -> DTO:
         try:
-            instrument = self.repository.get(uuid)
-            return instrument
-        except (self.repository.Exceptions.DoesNotExist, AssertionError):
-            raise HTTPException(404, detail="Instrument not found")
+            student = self.repository.get(uuid)
+            return student
+        except self.repository.Exceptions.DoesNotExist:
+            raise HTTPException(404, detail="Student not found")
         except Exception:
             raise HTTPException(500, detail=f"An error occured: {traceback.format_exc()}")
 
     async def create(
         self,
-        data: DTO.InstrumentPostSchema = Body(...),
+        data: DTO.StudentPostSchema = Body(...),
         current_user: UserDTO = Depends(AuthController.scan_token)
     ) -> DTO:
         try:
-            assert current_user.admin, "Only admins can create instruments"
-            instrument = self.DTO(**data.dict(), updated_by=current_user)
-            return self.repository.create(instrument)
+            assert current_user.admin, "Only admins can create students"
+            student = self.DTO(**data.dict(), updated_by=current_user)
+            return self.repository.create(student)
         except AssertionError as e:
             raise HTTPException(403, detail=str(e))
         except self.repository.Exceptions.AlreadyExists:
-            raise HTTPException(403, detail='Instrument already exists')
+            raise HTTPException(403, detail='Student already exists')
         except Exception:
             raise HTTPException(503, detail=f"An error occured: {traceback.format_exc()}")
     
     async def update(
         self,
         uuid: UUID = Path(..., description=descriptions['uuid']),
-        data: DTO.InstrumentPutSchema = Body(...),
+        data: DTO.StudentPutSchema = Body(...),
         current_user: UserDTO = Depends(AuthController.scan_token)
     ) -> DTO:
         try:
-            instrument = self.repository.get(uuid)
+            student = self.repository.get(uuid)
             for k, v in data.dict(exclude_none=True, exclude_unset=True).items():
-                setattr(instrument, k, v)
-            instrument.updated_by = current_user
-            return self.repository.save(instrument)
+                setattr(student, k, v)
+            student.updated_by = current_user
+            return self.repository.save(student)
         except Exception:
             raise HTTPException(500, detail=f"An error occured: {traceback.format_exc()}")
     
@@ -100,8 +100,8 @@ class InstrumentController:
     ) -> None:
         try:
             assert current_user.admin, "Only admins can delete users"
-            instrument = self.repository.get(uuid)
-            self.repository.delete(instrument)
+            student = self.repository.get(uuid)
+            self.repository.delete(student)
         except (self.repository.Exceptions.DoesNotExist):
             raise HTTPException(404, detail=f"Instrument not found")
         except AssertionError as e:

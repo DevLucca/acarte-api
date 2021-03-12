@@ -31,7 +31,6 @@ def as_form(cls: _T) -> _T:
     setattr(cls, "as_form", _as_form)
     return cls
 
-
 class MetaDTO(ModelMetaclass):
     def __new__(cls, *args, **kwargs):
         return as_form(super().__new__(cls, *args, **kwargs))
