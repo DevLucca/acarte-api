@@ -55,3 +55,9 @@ class StudentDTO(BaseDTO):
         created_at: datetime = Field(...)
         updated_at: datetime = Field(None)
         updated_by: UserDTO.UserUpdatedByResponseSchema = Field(None)
+        
+    class StudentLoanResponseSchema(BaseDTO):
+        uuid: UUID = Field(...)
+        name: str = Field(...)
+        surname: str = Field(...)
+        ra: str = Field(None)

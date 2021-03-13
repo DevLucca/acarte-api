@@ -32,8 +32,8 @@ class LoanController:
         self,
         instrument_uuid: UUID = Query(None, description=descriptions['uuid']),
         student_uuid: UUID = Query(None, description=descriptions['uuid']),
-        lented_date: datetime = Query(None, description=descriptions['lented_at']),
-        returned_date: datetime = Query(False, description=descriptions['returned_at']),
+        lented_date: date = Query(date.today(), description=descriptions['lented_at']),
+        returned_date: date = Query(date.today(), description=descriptions['returned_at']),
         pagination: PaginationParams = Depends()
     ) -> Page[DTO]:
         try:
@@ -80,9 +80,10 @@ class LoanController:
     ) -> DTO:
         try:
             loan = self.repository.get(uuid)
-            if data.is_returned: 
-                loan.returned_at = datetime.now()
-                loan.updated_by = current_user
+            assert loan.returned_at is None, "Loan already returned"
+            if data.is_returned: loan.updated_by = current_user
             return self.repository.save(loan)
+        except AssertionError as e:
+            raise HTTPException(409, detail=str(e))
         except Exception:
             raise HTTPException(500, detail=f"An error occured: {traceback.format_exc()}")

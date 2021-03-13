@@ -22,8 +22,8 @@ class LoanDTO(BaseDTO):
     updated_by: UserDTO = None
 
     class LoanPostSchema(BaseDTO):
-        instruments: List[InstrumentDTO] = Field(...)
-        student: StudentDTO = Field(...)
+        instruments: List[UUID] = Field(...)
+        student: UUID = Field(...)
 
         @validator("instruments")
         def validate_instruments(cls, val):
@@ -40,8 +40,8 @@ class LoanDTO(BaseDTO):
 
     class LoanResponseSchema(BaseDTO):
         uuid: UUID = Field(...)
-        instruments: List[InstrumentDTO.InstrumentResponseSchema] = Field(...)
-        student: StudentDTO.StudentResponseSchema = Field(...)
+        instruments: List[InstrumentDTO.InstrumentLoanResponseSchema] = Field(...)
+        student: StudentDTO.StudentLoanResponseSchema = Field(...)
         lented_at: datetime = Field(...)
         returned_at: datetime = Field(None)
         created_at: datetime = Field(...)

@@ -67,3 +67,9 @@ class InstrumentDTO(BaseDTO):
         created_at: datetime = Field(...)
         updated_at: datetime = Field(None)
         updated_by: UserDTO.UserUpdatedByResponseSchema = Field(None)
+        
+    class InstrumentLoanResponseSchema(BaseDTO):
+        uuid: UUID = Field(...)
+        name: str = Field(...)
+        number: str = Field(...)
+        itype: InstrumentTypes = Field(...)
