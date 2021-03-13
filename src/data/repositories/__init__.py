@@ -74,8 +74,8 @@ class BaseRepository(metaclass=MetaRepository):
                 db_obj = self.Entity[id]
             assert db_obj
             return db_obj
-        except (orm.ObjectNotFound, AssertionError):
-            raise self.Exceptions.DoesNotExist
+        except (orm.ObjectNotFound, AssertionError) as e:
+            raise self.Exceptions.DoesNotExist(message=str(e))
         
     def _get_related_object(self, entity: dict, repository, dto):
         db_obj = repository._get_db_obj(entity.id)

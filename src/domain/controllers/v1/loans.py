@@ -1,9 +1,11 @@
+from domain.dtos.students import StudentDTO
 import traceback
 from uuid import UUID
 from datetime import date, datetime
 
 from domain.dtos.users import UserDTO
 from domain.dtos.loans import LoanDTO
+from domain.dtos.instruments import InstrumentDTO
 from domain.controllers.auth import AuthController
 
 from data.repositories.loans import LoanRepository
@@ -64,11 +66,17 @@ class LoanController:
         current_user: UserDTO = Depends(AuthController.scan_token)
     ) -> DTO:
         try:
-            print(data)
+            list_instruments = data.instruments
+            data.instruments = []
+            for instrument in list_instruments:
+                data.instruments.append(InstrumentDTO(uuid=instrument))
+            data.student = StudentDTO(uuid=data.student)
             loan = self.DTO(**data.dict(), updated_by=current_user)
             return self.repository.create(loan)
         except self.repository.Exceptions.AlreadyExists:
             raise HTTPException(403, detail='Loan already exists')
+        except self.repository.Exceptions.DoesNotExist as e:
+            raise HTTPException(404, detail=f'Instrument or Student not found')
         except Exception:
             raise HTTPException(503, detail=f"An error occured: {traceback.format_exc()}")
     

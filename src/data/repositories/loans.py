@@ -1,3 +1,5 @@
+from data.repositories import instruments
+from domain.dtos import students
 from pony import orm
 from uuid import UUID
 from uuid import uuid4
@@ -104,13 +106,37 @@ class LoanRepository(BaseRepository):
         try:
             dto.uuid = uuid4()
             dto.created_at = datetime.now()
+            dto.lented_at = datetime.now()
             user = dto.updated_by
+            instruments = dto.instruments
+            student = dto.student
             del dto.updated_by
-            db_obj = self.Entity(**dto.dict(), updated_by=UserRepository()._get_db_obj(user.uuid))
+            del dto.instruments
+            del dto.student
+            db_obj = self.Entity(
+                **dto.dict(), 
+                instruments=[InstrumentRepository()._get_db_obj(inst.uuid) for inst in instruments], 
+                student=StudentRepository()._get_db_obj(student.uuid),
+                updated_by=UserRepository()._get_db_obj(user.uuid)
+            )
             orm.commit()
-            db_obj = db_obj.to_dict(related_objects=True)
-            db_obj['updated_by'] = self._get_related_object(db_obj.get('updated_by'), UserRepository(), UserDTO)
-            return self.DTO(**db_obj)
+            db_objs = self._get_db_obj(db_obj.uuid)
+            to_be_loan = {}
+            for db_obj in db_objs:
+                loan, stud, inst = db_obj
+                stud = stud.to_dict()
+                inst = inst.to_dict()
+                del stud['updated_by']
+                del inst['updated_by']
+                if loan_id := to_be_loan:
+                    loan_id['instruments'].append(inst)
+                else:
+                    loan = loan.to_dict(related_objects=True)
+                    loan['updated_by'] = self._get_related_object(loan.get('updated_by'), UserRepository(), UserDTO)
+                    loan['student'] = stud
+                    loan['instruments'] = [inst]
+                    to_be_loan = loan
+            return self.DTO(**to_be_loan)
         except orm.core.TransactionIntegrityError:
             raise self.Exceptions.AlreadyExists
 
