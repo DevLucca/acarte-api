@@ -8,6 +8,7 @@ class StudentsEntity(db_client.Entity):
     _table_ = 'students'
     
     loan = orm.Set("LoansEntity")
+    instruments = orm.Set("InstrumentsEntity")
     uuid = orm.Required(UUID,unique=True)
     name = orm.Required(str,max_len=50)
     surname = orm.Required(str,max_len=50)

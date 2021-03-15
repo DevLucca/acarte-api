@@ -3,8 +3,11 @@ from uuid import UUID
 
 from domain.dtos.users import UserDTO
 from domain.dtos.instruments import InstrumentDTO
+from domain.dtos.students import StudentDTO
 from domain.controllers.auth import AuthController
 
+from data.repositories.loans import LoanRepository
+from data.repositories.students import StudentRepository
 from data.repositories.instruments import InstrumentRepository
 
 from fastapi import (
@@ -62,6 +65,20 @@ class InstrumentController:
         except Exception:
             raise HTTPException(500, detail=f"An error occured: {traceback.format_exc()}")
 
+    async def get_student_loan(
+        self,
+        uuid: UUID = Path(..., description=descriptions['uuid'])
+    ) -> StudentDTO:
+        try:
+            loan = LoanRepository().query(instrument_uuid=uuid)
+            assert loan, "Instrument is not lented"
+            # assert loan.
+            return StudentRepository().get(loan[0].student.id)
+        except AssertionError as e:
+            raise HTTPException(404, detail=str(e))
+        except Exception:
+            raise HTTPException(500, detail=f"An error occured: {traceback.format_exc()}")
+    
     async def create(
         self,
         data: DTO.InstrumentPostSchema = Body(...),

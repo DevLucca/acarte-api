@@ -1,3 +1,4 @@
+from data.repositories import instruments
 from domain.dtos.students import StudentDTO
 import traceback
 from uuid import UUID
@@ -69,14 +70,20 @@ class LoanController:
             list_instruments = data.instruments
             data.instruments = []
             for instrument in list_instruments:
-                data.instruments.append(InstrumentDTO(uuid=instrument))
+                instrument = InstrumentDTO(uuid=instrument)
+                assert not instrument.repair and instrument.active, f"Instrument ({instrument.name} - {instrument.number} - {instrument.uuid}) is on repair or inactive"
+                assert instruments.InstrumentRepository
+                data.instruments.append(instrument)
             data.student = StudentDTO(uuid=data.student)
+            assert not data.student.blocked and data.student.active, f"Student ({data.student.name} {data.student.surname}) is blocked or inactive"
             loan = self.DTO(**data.dict(), updated_by=current_user)
             return self.repository.create(loan)
         except self.repository.Exceptions.AlreadyExists:
             raise HTTPException(403, detail='Loan already exists')
         except self.repository.Exceptions.DoesNotExist as e:
             raise HTTPException(404, detail=f'Instrument or Student not found')
+        except AssertionError as e:
+            raise HTTPException(403, detail=str(e))
         except Exception:
             raise HTTPException(503, detail=f"An error occured: {traceback.format_exc()}")
     

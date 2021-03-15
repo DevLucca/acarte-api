@@ -1,3 +1,4 @@
+from domain.dtos.students import StudentDTO
 from fastapi_pagination import Page
 
 from domain.routers import BaseRouter
@@ -17,7 +18,11 @@ router.get("/{uuid}",
         name="Get Instrument by UUID",
         summary="Buscar Instrumento"
     )(controller.get_by_id)
-# router.get("/{uuid}/student", response_model=ResponseStudentSchema, summary="Buscar aluno no qual o instrumento esta emprestado")(controller.get_student_loan)
+router.get("/{uuid}/student",
+        response_model=StudentDTO.StudentResponseSchema,
+        name="Get the student that is lenting",
+        summary="Buscar aluno no qual o instrumento esta emprestado"
+    )(controller.get_student_loan)
 router.post("/",
         response_model=DTO.InstrumentResponseSchema,
         name="Create Instrument",

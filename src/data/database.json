@@ -1,0 +1,18 @@
+{
+    "initiated": false,
+    "tables": [
+        {
+            "name": "users",
+            "records": [
+                {
+                    "username": "admin",
+                    "name": "Administrador",
+                    "email": "admin@admin.com",
+                    "password": "123",
+                    "admin": true,
+                    "active": true
+                }
+            ]
+        }
+    ]
+}

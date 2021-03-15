@@ -4,6 +4,7 @@ from datetime import datetime
 
 from domain.dtos import BaseDTO
 from domain.dtos.users import UserDTO
+from domain.dtos.students import StudentDTO 
 
 from pydantic.fields import Field
 from pydantic.class_validators import validator
@@ -24,6 +25,7 @@ class InstrumentDTO(BaseDTO):
     notes: str = None
     repair: bool = None
     active: bool = None
+    lented_to: StudentDTO = None
     created_at: datetime = None
     updated_at: datetime = None
     updated_by: UserDTO = None
@@ -64,6 +66,7 @@ class InstrumentDTO(BaseDTO):
         notes: str = Field(None)
         repair: bool = Field(False)
         active: bool = Field(True)
+        lented_to: StudentDTO.StudentResponseSchema = Field(None)
         created_at: datetime = Field(...)
         updated_at: datetime = Field(None)
         updated_by: UserDTO.UserUpdatedByResponseSchema = Field(None)

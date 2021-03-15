@@ -62,6 +62,8 @@ class StudentController:
         except Exception:
             raise HTTPException(500, detail=f"An error occured: {traceback.format_exc()}")
 
+    async def get_instruments_loan(self): ...
+    
     async def create(
         self,
         data: DTO.StudentPostSchema = Body(...),

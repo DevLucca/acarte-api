@@ -1,5 +1,4 @@
-from data.repositories import instruments
-from domain.dtos import students
+import calendar
 from pony import orm
 from uuid import UUID
 from uuid import uuid4
@@ -7,8 +6,6 @@ from datetime import date, datetime
 
 from domain.dtos.users import UserDTO
 from domain.dtos.loans import LoanDTO
-from domain.dtos.students import StudentDTO
-from domain.dtos.instruments import InstrumentDTO
 
 from data.repositories import BaseRepository
 from data.repositories.users import UserRepository
@@ -47,11 +44,12 @@ class LoanRepository(BaseRepository):
 
     def query(self, **kwargs):
         filters = self._clean_filter_args(kwargs)
+        today = date.today()
         db_query = (
             orm.select(
                 (loan, stud, inst) for loan in self.Entity for inst in loan.instruments for stud in loan.student
-                       if filters.get('lented_at') <= loan.lented_at
-                       and filters.get('returned_at') >= orm.coalesce(loan.returned_at, date.today())
+                       if filters.get('lented_at', date(today.year, today.month, 1)) <= loan.lented_at
+                       and filters.get('returned_at', date(today.year, today.month, calendar.monthrange(today.year, today.month)[1])) >= orm.coalesce(loan.returned_at, date.today())
             )
         )
         to_be_dto = []
